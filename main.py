@@ -8,6 +8,7 @@ from PIL import Image
 import subprocess
 import yaml
 import sys
+import json
 
 from tqdm import tqdm
 from dotenv import load_dotenv
@@ -24,6 +25,9 @@ BASE_OUTPUT_DIR = Path("output")
 
 SKIP_EXISTING = True  # Skip inference if .md already exists
 
+# Cost
+PRICE_PER_1K_INPUT = 0.0002 
+PRICE_PER_1K_OUTPUT = 0.0008
 
 # =============================
 # Utilities
@@ -71,6 +75,8 @@ def infer_page(image_path: Path, mode: str) -> str:
     prompt_func = PROMPT_MAP.get(mode, PROMPT_MAP["sr"])
     user_prompt = prompt_func(page_id, width, height)
 
+    start_time = time.time()
+
     response = client.chat.completions.create(
         model=DEPLOYMENT_NAME,
         messages=[
@@ -89,7 +95,15 @@ def infer_page(image_path: Path, mode: str) -> str:
         temperature=0,
     )
 
-    return response.choices[0].message.content.strip()
+    elapsed = time.time() - start_time
+    content = response.choices[0].message.content.strip()
+    
+    # Extract token usage
+    usage = response.usage
+    cost = (usage.prompt_tokens / 1000 * PRICE_PER_1K_INPUT) + \
+           (usage.completion_tokens / 1000 * PRICE_PER_1K_OUTPUT)
+    
+    return content, elapsed, cost
 
 
 # =============================
@@ -98,6 +112,20 @@ def infer_page(image_path: Path, mode: str) -> str:
 def run_inference(mode: str, max_pages: int = None):
     output_dir = BASE_OUTPUT_DIR / mode
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    stats_path = output_dir / "inference_stats.json"
+    
+    # Load existing stats if they exist, otherwise start from zero
+    if stats_path.exists():
+        with open(stats_path, "r") as f:
+            prev_stats = json.load(f)
+            total_time = prev_stats.get("total_time", 0)
+            total_cost = prev_stats.get("total_cost", 0)
+            count = prev_stats.get("completed_count", 0)
+    else:
+        total_time = 0
+        total_cost = 0
+        count = 0
 
     image_files = sorted(
         p for p in IMAGE_DIR.iterdir()
@@ -115,10 +143,25 @@ def run_inference(mode: str, max_pages: int = None):
         if SKIP_EXISTING and out_path.exists():
             continue
 
-        md_text = infer_page(image_path, mode)
+        md_text, elapsed, cost = infer_page(image_path, mode)
+        
+        # Update running totals
+        total_time += elapsed
+        total_cost += cost
+        count += 1
 
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(md_text)
+    
+        # Save updated stats after every image (prevents data loss if crashed)
+        with open(stats_path, "w") as f:
+            json.dump({
+                "avg_inference_time": total_time / count if count > 0 else 0,
+                "avg_cost": total_cost / count if count > 0 else 0,
+                "total_time": total_time,
+                "total_cost": total_cost,
+                "completed_count": count
+            }, f, indent=2)
 
 def run_evaluation(mode: str, base_config: str = "configs/end2end.yaml"):
     """
