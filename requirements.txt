@@ -112,3 +112,5 @@ xxhash==3.5.0
 yarl==1.15.2
 zipp==3.20.2
 pycocotools==2.0.7
+python-dotenv>=1.0.0
+openai
