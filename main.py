@@ -247,3 +247,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+'''How to run:
+python3 main.py --mode all --max_pages 10
+python3 main.py --mode all
+'''
