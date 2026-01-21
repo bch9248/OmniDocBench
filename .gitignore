@@ -18,7 +18,7 @@ old_test.py
 old_tools
 old_trace
 result/
-configs/
+
 
 # Environments
 .env
