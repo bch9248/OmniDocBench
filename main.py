@@ -113,7 +113,7 @@ def run_inference(mode: str, max_pages: int = None):
     output_dir = BASE_OUTPUT_DIR / mode
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    stats_path = output_dir / "inference_stats.json"
+    stats_path = output_dir / "all.json"
     
     # Load existing stats if they exist, otherwise start from zero
     if stats_path.exists():
@@ -234,7 +234,7 @@ def main():
 
     for mode in modes:
         # Stage 1: Inference (Produces .md files in output/{mode})
-        run_inference(mode, args.max_pages)
+        # run_inference(mode, args.max_pages)
         
         # Stage 2: Evaluation (Reads from output/{mode}, writes to result/{mode})
         run_evaluation(mode)

@@ -50,7 +50,7 @@ def compute_overall(metric_json):
 
 def run(mode: str):
     result_dir = Path("result") / mode
-    output_dir = Path("output") / mode # Where inference_stats.json lives
+    output_dir = Path("output") / mode # Where all.json lives
 
     metric_file = result_dir / f"{mode}_{MATCH_NAME}_metric_result.json"
     text_block_file = result_dir / f"{mode}_{MATCH_NAME}_text_block_result.json"
@@ -61,7 +61,7 @@ def run(mode: str):
     metric_json = load_json(metric_file)
 
     # Load Inference Stats
-    stats_file = output_dir / "inference_stats.json"
+    stats_file = output_dir / "all.json"
     perf_data = load_json(stats_file) if stats_file.exists() else {}
 
     summary = {
