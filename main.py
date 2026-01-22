@@ -234,7 +234,7 @@ def main():
 
     for mode in modes:
         # Stage 1: Inference (Produces .md files in output/{mode})
-        # run_inference(mode, args.max_pages)
+        run_inference(mode, args.max_pages)
         
         # Stage 2: Evaluation (Reads from output/{mode}, writes to result/{mode})
         run_evaluation(mode)
