@@ -155,6 +155,7 @@ class End2EndDataset():
         display_formula_match = []
         html_table_match = []
         latex_table_match = []
+        circuit_diagram_match = []
         order_match = []
         save_time = time.time()
         process_bar = tqdm(gt_samples, ascii=True, ncols=140)
@@ -179,7 +180,7 @@ class End2EndDataset():
             # 对单个样本匹配，根据不同的元素类型（如文本块、显示公式、表格等），使用指定的匹配方法将gt与预测结果进行匹配，并返回匹配结果
             result = self.process_get_matched_elements(sample, pred_content, img_name, save_time) # Don't use timeout logic
 
-            [plain_text_match_clean, formated_display_formula, latex_table_match_s, html_table_match_s, order_match_single] = result
+            [plain_text_match_clean, formated_display_formula, circuit_diagram_match_s, latex_table_match_s, html_table_match_s, order_match_single] = result
 
             # if img_name == 'docstructbench_dianzishu_zhongwenzaixian-o.O-63674848.pdf_101.jpg':
             #     pdb.set_trace()
@@ -189,6 +190,8 @@ class End2EndDataset():
                 plain_text_match.extend(plain_text_match_clean)
             if formated_display_formula:
                 display_formula_match.extend(formated_display_formula)
+            if circuit_diagram_match_s:
+                circuit_diagram_match.extend(circuit_diagram_match_s)
             if latex_table_match_s:
                 latex_table_match.extend(latex_table_match_s)
             if html_table_match_s:
@@ -241,7 +244,8 @@ class End2EndDataset():
 
         matched_samples_all = {
             'text_block': DATASET_REGISTRY.get('recogition_end2end_base_dataset')(plain_text_match),
-            'display_formula':  DATASET_REGISTRY.get('recogition_end2end_base_dataset')(display_formula_match), 
+            'display_formula':  DATASET_REGISTRY.get('recogition_end2end_base_dataset')(display_formula_match),
+            'circuit_diagram': DATASET_REGISTRY.get('recogition_end2end_base_dataset')(circuit_diagram_match),
             'table': DATASET_REGISTRY.get('recogition_end2end_table_dataset')(table_match, table_format),
             'reading_order': DATASET_REGISTRY.get('recogition_end2end_base_dataset')(order_match)
         }
@@ -273,13 +277,14 @@ class End2EndDataset():
         #         gt_mix.extend(gt_page_elements[category])
         gt_mix = self.get_page_elements_list(gt_page_elements, ['text_block', 'title', 'code_txt', 'code_txt_caption', 'reference', 'equation_caption',
                                                 'figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption',
-                                                'header', 'footer', 'page_footnote', 'page_number', 'equation_isolated'])
+                                                'header', 'footer', 'page_footnote', 'page_number', 'equation_isolated', 'circuit_diagram', 'circuit_caption', 'circuit_footnote'])
         if gt_mix:
             gt_mix = self.get_sorted_text_list(gt_mix)
 
         display_formula_match_s = []
         plain_text_match_clean = []
         latex_table_match_s = []
+        circuit_diagram_match_s = []
         html_table_match_s = []
         order_match_single = []
 
@@ -317,12 +322,15 @@ class End2EndDataset():
             gt_category = item.get('gt_category_type',None)
             if gt_category in ['text_block', 'title', 'code_txt', 'code_txt_caption', 'reference', 'equation_caption',
                                                     'figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption',
-                                                    'header', 'footer', 'page_footnote', 'page_number']:
+                                                    'header', 'footer', 'page_footnote', 'page_number', 'circuit_caption', 'circuit_footnote']:
                 plain_text_match_s.append(item)
             elif gt_category == 'equation_isolated':
                 display_formula_match_s.append(item)
+            elif gt_category == 'circuit_diagram': # Separate circuit diagrams
+                circuit_diagram_match_s.append(item)
 
         display_formula_match_s = [x for x in display_formula_match_s if x['gt_idx'] != [""]]
+        circuit_diagram_match_s = [x for x in circuit_diagram_match_s if x['gt_idx'] != [""]]
 
         if not plain_text_match_s:
             # print(f'Time out for text match of {img_name}. The plain text match will be empty.')
@@ -337,7 +345,7 @@ class End2EndDataset():
             order_match_single = self.get_order_paired(order_match_s, img_name)
 
 
-        return [plain_text_match_clean, display_formula_match_s, latex_table_match_s, html_table_match_s, order_match_single]        
+        return [plain_text_match_clean, display_formula_match_s, circuit_diagram_match_s, latex_table_match_s, html_table_match_s, order_match_single]       
 
     
 

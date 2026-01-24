@@ -97,9 +97,21 @@ def get_gt_pred_lines(gt_mix,pred_dataset_mix,line_type):
                 else:
                     gt_cat_list.append(item['category_type'])
             # text      
-            elif item['category_type'] in ['text_block', 'title', 'code_txt', 'code_txt_caption', 'reference', 'equation_caption','figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption','header', 'footer', 'page_footnote', 'page_number']:
+            elif item['category_type'] in ['text_block', 'title', 'code_txt', 'code_txt_caption', 'reference', 'equation_caption','figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption','header', 'footer', 'page_footnote', 'page_number', 'circuit_caption', 'circuit_footnote']:
                 gt_lines.append(str(item['text']))
                 norm_gt_lines.append(clean_string(textblock2unicode(str(item['text']))))
+
+                if item.get('fine_category_type'):
+                    gt_cat_list.append(item['fine_category_type'])
+                else:
+                    gt_cat_list.append(item['category_type'])
+
+            # circuit_diagram - can have either 'text' or 'spice' field
+            elif item['category_type'] == 'circuit_diagram':
+                # Prefer 'text' field if available, otherwise use 'spice' field
+                circuit_content = item.get('text', item.get('spice', ''))
+                gt_lines.append(str(circuit_content))
+                norm_gt_lines.append(clean_string(textblock2unicode(str(circuit_content))))
 
                 if item.get('fine_category_type'):
                     gt_cat_list.append(item['fine_category_type'])

@@ -335,7 +335,7 @@ def match_gt2pred_quick(gt_items, pred_items, line_type, img_name):
     
     # match category ignore first
     ignores = ['figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 
-               'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption']
+               'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption', 'circuit_caption', 'circuit_footnote']
     
     ignore_gt_lines = []
     ignores_ori_gt_lines= []
@@ -445,7 +445,7 @@ def match_gt2pred_quick(gt_items, pred_items, line_type, img_name):
             entry['norm_pred'] = ''.join([ignore_pred_lines[_] for _ in entry['pred_idx']]) if entry['pred_idx'] != [""] else ""
 
             if entry['gt_idx'] != [""]:
-                ignore_type = ['figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption']
+                ignore_type = ['figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption', 'circuit_caption', 'circuit_footnote']
                 gt_cagegory_clean = [ignores_gt_cat_list[_] for _ in entry['gt_idx'] if ignores_gt_cat_list[_] not in ignore_type] 
                 if gt_cagegory_clean:
                     entry['gt_category_type'] = Counter(gt_cagegory_clean).most_common(1)[0][0] 
@@ -547,7 +547,7 @@ def match_gt2pred_quick(gt_items, pred_items, line_type, img_name):
 
     for entry in merged_results:
         if entry['gt_idx'] != [""]:
-            ignore_type = ['figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption']
+            ignore_type = ['figure_caption', 'figure_footnote', 'table_caption', 'table_footnote', 'code_algorithm', 'code_algorithm_caption', 'header', 'footer', 'page_footnote', 'page_number', 'equation_caption', 'circuit_caption', 'circuit_footnote']
             gt_cagegory_clean = [no_ignores_gt_cat_list[_] for _ in entry['gt_idx'] if no_ignores_gt_cat_list[_] not in ignore_type] 
             if gt_cagegory_clean:
                 entry['gt_category_type'] = Counter(gt_cagegory_clean).most_common(1)[0][0] 
@@ -569,6 +569,8 @@ def match_gt2pred_quick(gt_items, pred_items, line_type, img_name):
             mutli_formula  = ' \\\\ '.join(['{'+no_ignores_ori_gt_lines[_].strip('$$').strip('\n')+'}' for _ in  entry['gt_idx']]) if entry['gt_idx'] != [""] else ""
             mutli_formula = '\\begin{array}{l} ' + mutli_formula + ' \end{array}'
             entry['gt'] = mutli_formula
+        elif entry['gt_category_type'] == 'circuit_diagram' and len(entry['gt_idx']) > 1:
+            entry['gt'] = '\n'.join([no_ignores_ori_gt_lines[_].strip() for _ in entry['gt_idx']]) if entry['gt_idx'] != [""] else ""
         else:
             entry['gt'] = ''.join([no_ignores_ori_gt_lines[_] for _ in entry['gt_idx']]) if entry['gt_idx'] != [""] else ""
 
@@ -581,6 +583,8 @@ def match_gt2pred_quick(gt_items, pred_items, line_type, img_name):
             mutli_formula  = ' \\\\ '.join(['{'+no_ignores_ori_pred_lines[_].strip('$$').strip('\n')+'}' for _ in  entry['pred_idx']]) if entry['pred_idx'] != [""] else ""
             mutli_formula = '\\begin{array}{l} ' + mutli_formula + ' \end{array}'
             entry['pred'] = mutli_formula
+        elif 'circuit_diagram' in entry['pred_category_type'] and len(entry['pred_idx']) > 1:
+            entry['pred'] = '\n'.join([no_ignores_ori_pred_lines[_].strip() for _ in entry['pred_idx']]) if entry['pred_idx'] != [""] else ""
         else:
             entry['pred'] = ''.join([no_ignores_ori_pred_lines[_] for _ in entry['pred_idx']]) if entry['pred_idx'] != [""] else ""
 
