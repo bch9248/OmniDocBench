@@ -20,7 +20,7 @@ from prompts import PROMPT_MAP, SYSTEM_PROMPT
 # =============================
 # Configuration
 # =============================
-IMAGE_DIR = Path("OmniDocBench/images")
+IMAGE_DIR = Path("OmniDocBench/subdataset")
 BASE_OUTPUT_DIR = Path("output")
 
 SKIP_EXISTING = True  # Skip inference if .md already exists

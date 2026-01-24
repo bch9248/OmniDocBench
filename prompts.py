@@ -1,71 +1,93 @@
 # System Prompt
-SYSTEM_PROMPT = (
-    "You are a document analysis system. "
-    "Perform PAGE-LEVEL document parsing only. "
-    "Do not infer cross-page information."
-)
+# SYSTEM_PROMPT = (
+#     "You are a document analysis system. "
+#     "Perform PAGE-LEVEL document parsing only. "
+#     "Do not infer cross-page information."
+# )
+
+# System Prompt
+SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images to Markdown format. Please follow these instructions for the conversion:
+
+    1. Text Processing:
+    - Accurately recognize all text content in the PDF image without guessing or inferring.
+    - Convert the recognized text into Markdown format.
+    - Maintain the original document structure, including headings, paragraphs, lists, etc.
+
+    2. Mathematical Formula Processing:
+    - Convert all mathematical formulas to LaTeX format.
+    - Enclose inline formulas with \( \). For example: This is an inline formula \( E = mc^2 \)
+    - Enclose block formulas with \\[ \\]. For example: \[ \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
+
+    3. Table Processing:
+    - Convert tables to HTML format.
+    - Wrap the entire table with <table> and </table>.
+
+    4. Figure Handling:
+    - Ignore figures content in the PDF image. Do not attempt to describe or convert images.
+
+    5. Output Format:
+    - Ensure the output Markdown document has a clear structure with appropriate line breaks between elements.
+    - For complex layouts, try to maintain the original document's structure and format as closely as possible.
+
+    Please strictly follow these guidelines to ensure accuracy and consistency in the conversion. Your task is to accurately convert the content of the PDF image into Markdown format without adding any extra explanations or comments.
+"""
 
 
 def get_naive_prompt(page_id, width, height):
     return f"""
-Extract structural information from this document page.
+Parsing this document follow the rules.
 
 Rules:
+- Output ONLY the element in the document in md format 
 - Treat this as a single independent page
+- Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
-- Output STRICT JSON only
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
 - No markdown, no explanations
 
-JSON schema:
-{{
-  "page_id": "{page_id}",
-  "page_size": {{"width": {width}, "height": {height}}},
-  "language": "<ISO-639-1>",
-  "blocks": [
-    {{
-      "type": "title | paragraph | table | figure | list | header | footer",
-      "text": "...",
-      "bbox": [x_min, y_min, x_max, y_max]
-    }}
-  ]
-}}
 """
 
-def get_sr_prompt(page_id, width, height):
+def get_cot_prompt(page_id, width, height):
     return f"""
-Extract structural information from this document page following the steps.
+Parsing this document step-by-step following the rules.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- No markdown, no explanations
+
+"""
+
+def get_pearl_prompt(page_id, width, height):
+    return f"""
+Parsing this document following these steps and rules.
 
 Steps:
-1. Retrieve all text content from the page first.
-2. Analyze the page and identify each layout block.
-3. For each block, determine its type, text content, and bounding box.
-4. Integrate all text content to the information from each layout block properly.
-5. From the integration, construct the final JSON output as per the schema.
+1. Plan: read the document and output a sequence of steps to parse it.
+2. Execute: execute each plan step internally.
+3. Aggregate: integrates all information from each step to produce the final output.
+
 
 Rules:
+- Output ONLY the element in the document in md format 
 - Treat this as a single independent page
+- Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
-- Output STRICT JSON only
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
 - No markdown, no explanations
 
-JSON schema:
-{{
-  "page_id": "{page_id}",
-  "page_size": {{"width": {width}, "height": {height}}},
-  "language": "<ISO-639-1>",
-  "blocks": [
-    {{
-      "type": "title | paragraph | table | figure | list | header | footer",
-      "text": "...",
-      "bbox": [x_min, y_min, x_max, y_max]
-    }}
-  ]
-}}
 """
+
 
 def get_react_prompt(page_id, width, height):
     return f"""
-Extract structural information from this document page following these steps:
+Parsing this document following these steps and rules:
 
 Steps with ReAct framework (loop until done):
 Thought: What should I analyze on the page?
@@ -73,24 +95,70 @@ Action: Analyze following the previous thought.
 Observation: What did I learn from the analysis?
 
 Rules:
+- Output ONLY the element in the document in md format 
 - Treat this as a single independent page
+- Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
-- Output STRICT JSON only
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
 - No markdown, no explanations
+"""
 
-JSON schema:
-{{
-  "page_id": "{page_id}",
-  "page_size": {{"width": {width}, "height": {height}}},
-  "language": "<ISO-639-1>",
-  "blocks": [
-    {{
-      "type": "title | paragraph | table | figure | list | header | footer",
-      "text": "...",
-      "bbox": [x_min, y_min, x_max, y_max]
-    }}
-  ]
-}}
+def get_sr_prompt(page_id, width, height):
+    return f"""
+Parsing this document following these steps and rules.
+
+Steps:
+1. Try to parse all text content from the page first, for the structured text like table, formula, try to denote them in your natural language first.
+2. Analyze the page and identify each layout block.
+3. For each block, determine its type, text content, and bounding box.
+4. Integrate all text content to the information from each layout block properly.
+5. From the integration, construct the final output following the rules.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- No markdown, no explanations
+"""
+
+def get_sr_woa_prompt(page_id, width, height):
+    return f"""
+Parsing this document following these steps and rules.
+
+Steps:
+1. Retrieve all text content from the page first and construct the final output following the rules.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- No markdown, no explanations
+"""
+
+def get_sr_wos_prompt(page_id, width, height):
+    return f"""
+Parsing this document following these steps and rules.
+
+Steps:
+1. Analyze the text content and and identify each layout block.
+2. For each block, determine its type, text content, and bounding box.
+3. Construct the final output following the rules.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- No markdown, no explanations
 """
 
 coa_prompt = """
@@ -122,90 +190,82 @@ Strict Constraints:
 Remember: Do not start like: \`\`\`python\n, only output the code.
 """
 
-pearl_prompt = """
-You are a Supervisor implementing the PEARL (Plan-Execute) method for debugging Python3 code. 
-This workflow is INTERNAL — only the Aggregator’s output is shown to the user.
-
-Roles:
-1. Planner Agent: receives problem description and buggy code; outputs a sequence of debugging steps. Do not output code or reasoning.
-2. Executor Agents: execute each plan step internally; identify errors, generate one-line fixes, pass updated code to next Executor. Do not expose reasoning or intermediate code.
-3. Aggregator Agent: integrates all fixes and outputs ONLY the final corrected Python3 code. No explanations, reasoning, markdown, or extra text. Preserve original coding style and only fix buggy parts.
-
-Workflow: Planner → Executors (internal) → Aggregator (only visible output).
-
-Strict Constraints:
-- Do not alter problem requirements.
-- Only fix buggy portions.
-- Final output must be raw Python3 code, nothing else.
-
-Remember: Do not start like: \`\`\`python\n, only output the code.
-"""
-
-react_prompt = """
-You are a ReAct Agent specialized in debugging code.
-
-Your job is to fix a buggy program using structured reasoning and iterative actions.
-
-You will be given:
-1. A problem description.
-2. A buggy code that attempts to solve the problem.
-
-You will follow this step-by-step format:
-
-Question: [The task/problem to solve]
-
-Thought 1: [What part of the code or logic should I analyze first? What is likely causing the issue based on the explanation?]
-Action 1: [Inspect, analyze, or modify a portion of the code accordingly]
-Observation 1: [What did you learn from the inspection or modification? Did it help clarify or fix the issue?]
-
-Thought 2: [What should I do next based on the new understanding?]
-Action 2: [...]
-Observation 2: [...]
-
-...(continue this loop until the final fix is ready)
-
-Thought N: [Final reasoning combining all insights and changes]\n\n
-Output ONLY the final corrected code. Do not include explanations or extra text. No markdown code blocks.
-
-Constraints:
-- Do not alter problem requirements.
-- Only change the buggy portions of the code.
-- Keep the original coding style intact.
-
-Remember: Do not start like: \`\`\`python\n, only output the code.
-"""
-
-
-DF_pseu_prompt = """
-You are a Single Agent that debugs code.
-
-Your process:
-1. Imagine some test cases based on the problem description, including corner cases.
-2. Generate a reference pseudocode based on the problem description ONLY.
-3. (Internal) Explain the logic in the reference code.
-4. (Internal) Analyze the buggy code.
-5. (Internal) Test all of the test cases on the buggy code and the reference code to make sure they output the same result. Compare outputs.
-6. (Internal) Explain the logic difference between the two codes.
-7. consider both two codes, modify the buggy code to a correct one.
-
-Final Output Rule:
-- The above steps are for your internal reasoning only.
-- Output ONLY the final corrected  code as your final answer.
-- Do NOT include explanations, reasoning, or extra text.
-- Do NOT include markdown formatting (no ```python).
-- If no changes are needed, output the original buggy code exactly as is.
-
-Modify Constraints:
-- Do not alter problem requirements.
-- Only change the buggy portions of the buggy code.
-- Keep the original coding style intact.
-
-Your answer must contain only valid code and nothing else.
-"""
 
 # Mapping modes to functions for easy access
 PROMPT_MAP = {
     "naive": get_naive_prompt,
-    "sr": get_sr_prompt,
+    "cot": get_cot_prompt,
     "react": get_react_prompt,
+    "pearl": get_pearl_prompt,
+    "sr": get_sr_prompt,
+    "sr_woa": get_sr_woa_prompt,
+    "sr_wos": get_sr_wos_prompt,
 }
+
+
+
+# old one
+'''
+JSON schema:
+{{
+  "page_id": "{page_id}",
+  "page_size": {{"width": {width}, "height": {height}}},
+  "language": "<ISO-639-1>",
+  "blocks": [
+    {{
+      "type": "title | text_block | figure | figure_caption | figure_footnote | table | table_caption | table_footnote | equation_isolated | equation_caption | header | footer | page_number | page_footnote | abandon | code_txt | code_txt_caption | reference | text_span | equation_ignore | equation_inline | footnote_mark",
+      "text": "...",
+      "bbox": [x_min, y_min, x_max, y_max]
+    }}
+  ]
+}}
+
+JSON schema:
+{{
+  "layout_dets": [       // List of page elements
+    {{
+      "category_type": "<one of: title | text_block | figure | figure_caption | figure_footnote | table | table_caption | table_footnote | equation_isolated | equation_caption | header | footer | page_number | page_footnote | abandon | code_txt | code_txt_caption | reference | text_span | equation_ignore | equation_inline | footnote_mark>",
+      "poly": [x1, y1, x2, y2, x3, y3, x4, y4], 
+      "ignore": false,    // Whether to ignore during evaluation
+      "order": 0,         // Reading order
+      "anno_id": 0,       // Special annotation ID, unique for each layout box
+      "text": "...",      // Optional field, Text OCR results are written here
+      "latex": "$...$",   // Optional field, LaTeX for formulas is written here, MUST enclose in $...$
+      "html": "...",      // Optional field, HTML for tables is written here, MUST in valid HTML format
+      "attribute": {{"xxx": "xxx"}},
+      "line_with_spans": [
+        {{
+          "category_type": "text_span | equation_inline | equation_ignore | footnote_mark",
+          "poly": [...],
+          "ignore": false,
+          "text": "...",
+          "latex": "$...$"
+        }}
+      ],
+      "merge_list": []
+    }}
+  ],
+  "page_info": {{
+    "page_no": "{page_id}",
+    "height": "{height}",
+    "width": "{width}",
+    "image_path": "xx/xx.png",
+    "page_attribute": {{"xxx": "xxx"}}
+  }},
+  "extra": {{
+    "relation": []
+  }}
+}}
+Rules for filling fields based on category type:
+
+1. title, text_block, header, footer, page_number, page_footnote, equation_caption, equation_ignore, table_caption, table_footnote , figure_caption, figure_footnote, reference, code_txt, code_txt_caption, abandon: fill "text", leave "latex" and "html" empty.
+2. equation_isolated, equation_inline: fill "latex", leave "text" and "html" empty. Need to enclose the equation text in "$ ... $".
+3. table: fill "latex" and/or "html", leave "text" empty. 
+4. figure: fill "text", leave "latex" and "html" empty.
+5. text_span, footnote_mark: nested inside "line_with_spans".
+6. "order" starts from 0 and increases sequentially for each block. This is for reading order.
+6. Always provide "poly", "order", "anno_id".
+7. Use "merge_list" for multi-line blocks.
+
+Return valid JSON only, without extra text.
+'''

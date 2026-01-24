@@ -25,8 +25,8 @@ def compute_overall(metric_json):
 
     specs = [
         ("text_block", "Edit_dist"),
-        ("display_formula", "CDM"),
-        ("table", "TEDS_structure_only"),
+        ("display_formula", "Edit_dist"),
+        ("table", "Edit_dist"),
         ("reading_order", "Edit_dist"),
     ]
 
@@ -40,10 +40,11 @@ def compute_overall(metric_json):
 
     # Same formula as notebook
     out["overall_score"] = (
-        (1 - out["text_block_Edit_dist"]) * 100
-        + out["display_formula_CDM"]
-        + out["table_TEDS_structure_only"]
-    ) / 3
+        out["text_block_Edit_dist"]
+        + out["display_formula_Edit_dist"] 
+        + out["table_Edit_dist"]
+        + out["reading_order_Edit_dist"]
+    ) / 4
 
     return out
 
