@@ -48,7 +48,7 @@ def compute_overall(metric_json):
         + out["table_Edit_dist"]
         + out["reading_order_Edit_dist"]
         + out["circuit_diagram_Edit_dist"]
-    ) / 5.0
+    ) / 4.0
 
     return out
 

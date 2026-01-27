@@ -50,7 +50,7 @@ load_dotenv()
 
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_KEY")
-DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_GPT4")
 API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
 
 if not all([AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, DEPLOYMENT_NAME, API_VERSION]):
@@ -92,7 +92,7 @@ def infer_page(image_path: Path, mode: str) -> str:
                 ]
             }
         ],
-        temperature=0,
+        temperature=0.0,
     )
 
     elapsed = time.time() - start_time

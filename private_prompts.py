@@ -6,6 +6,35 @@
 # )
 
 # System Prompt
+# GOLDEN_SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images to JSON format. Please follow these instructions for the conversion:
+
+#     1. Text Processing:
+#     - Accurately recognize all text content in the PDF image without guessing or inferring.
+#     - Convert the recognized text into JSON format.
+#     - Maintain the original document structure, including headings, paragraphs, lists, etc.
+
+#     2. Mathematical Formula Processing:
+#     - Convert all mathematical formulas to LaTeX format.
+#     - Enclose inline formulas with \( \). For example: This is an inline formula \( E = mc^2 \)
+#     - Enclose block formulas with \\[ \\]. For example: \[ \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
+
+#     3. Table Processing:
+#     - Convert tables to HTML format.
+#     - Wrap the entire table with <table> and </table>.
+
+#     4. Figure Handling:
+#     - Ignore figures content in the PDF image. Do not attempt to describe or convert images.
+
+#     5. SPICE Diagrams:
+#     - Convert SPICE diagrams to text-based netlist format.
+
+#     6. Output Format:
+#     - Ensure the output JSON document has a clear structure in appropriate schema.
+#     - For complex layouts, try to maintain the original document's structure and format as closely as possible.
+
+#     Please strictly follow these guidelines to ensure accuracy and consistency in the conversion. Your task is to accurately convert the content of the PDF image into JSON format without adding any extra explanations or comments.
+# """
+
 SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images to Markdown format. Please follow these instructions for the conversion:
 
     1. Text Processing:
@@ -63,6 +92,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
 
 """
@@ -84,6 +114,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
 
 """
@@ -105,6 +136,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
 """
 
@@ -126,6 +158,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
 """
 
@@ -143,6 +176,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
 """
 
@@ -162,7 +196,69 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
 - No markdown, no explanations
+"""
+
+def get_golden_prompt(page_id, width, height):
+    return """
+Parsing this document following these steps and rules.
+
+Steps:
+1. Analyze the page and identify each layout block.
+2. For each block, determine its type, text content, and bounding box.
+3. Integrate all text content to the information from each layout block properly.
+. From the integration, construct the final output following the rules.
+
+Rules:
+- Output ONLY the element in the document in json schema format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- Category type is <one of: title | text_block | figure | figure_caption | figure_footnote | table | table_caption | table_footnote | equation_isolated | equation_caption | header | footer | page_number | page_footnote | abandon | code_txt | code_txt_caption | reference | text_span | equation_ignore | equation_inline | circuit_diagram | circuit_footnote | circuit_caption | footnote_mark>
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format
+- No markdown, no explanations
+
+
+json schema example:
+{
+  "page_info": { "page_attribute": {"xxx": "xxx"}, "page_no": 1, "height": 1684, "width": 1200, "image_path": "page_1.png" },
+  "layout_dets": [
+      {
+          "category_type": "text_block",
+          "poly": [100.0, 100.0, 1100.0, 100.0, 1100.0, 300.0, 100.0, 300.0],
+          "ignore": false, "order": 0, "anno_id": 0,
+          "text": "THIS DRAWING AND SPECIFICATIONS, HEREIN, ARE THE PROPERTY OF INVENTEC CORPORATION..."
+      },
+      {
+          "category_type": "title",
+          "poly": [300.0, 500.0, 900.0, 500.0, 900.0, 650.0, 300.0, 650.0],
+          "ignore": false, "order": 1, "anno_id": 1,
+          "text": "MACHU1416 TLD"
+      },
+      {
+          "category_type": "text_block",
+          "poly": [500.0, 700.0, 700.0, 700.0, 700.0, 750.0, 500.0, 750.0],
+          "ignore": false, "order": 2, "anno_id": 2,
+          "text": "2024.12.17"
+      },
+      {
+          "category_type": "circuit_diagram",
+          "poly": [50.0, 50.0, 1150.0, 50.0, 1150.0, 1400.0, 50.0, 1400.0],
+          "ignore": false, "order": 3, "anno_id": 3,
+          "spice": "* Charger Circuit\nU60000 RAA489110AS07GNPHAO\nL00000 0.47uH\nQ60012 AONR32314\nR60001 0.005_1%\nC60011 10uF_25V"
+      },
+      {
+          "category_type": "footer",
+          "poly": [500.0, 1500.0, 700.0, 1500.0, 700.0, 1550.0, 500.0, 1550.0],
+          "ignore": false, "order": 4, "anno_id": 4,
+          "text": "INVENTEC"
+      }
+  ],
+  "extra": { "relation": [] }
+}
 """
 
 coa_prompt = """
@@ -204,6 +300,7 @@ PROMPT_MAP = {
     "sr": get_sr_prompt,
     "sr_woa": get_sr_woa_prompt,
     "sr_wos": get_sr_wos_prompt,
+    # "golden": get_golden_prompt,
 }
 
 
