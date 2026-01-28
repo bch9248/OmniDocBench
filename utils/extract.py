@@ -94,6 +94,12 @@ html_table_reg = re.compile(
     re.DOTALL
 )
 
+# SPICE netlist for circuit diagrams
+spice_reg = re.compile(
+    r'<spice>(.*?)</spice>',
+    re.DOTALL
+)
+
 # title
 title_reg = re.compile(
     r'^\s*#.*$', 
@@ -144,6 +150,19 @@ def md_tex_filter(content):
     #         'content': inline_item['content'],
     #         'fine_category_type': 'equation_inline'
     #     })
+    
+    # extract SPICE netlists for circuit diagrams
+    spice_matches = spice_reg.finditer(content)
+    for match in spice_matches:
+        matched = match.group(0)
+        spice_content = match.group(1).strip()
+        position = [match.start(), match.end()]
+        content = content[:position[0]] + ' '*(position[1]-position[0]) + content[position[1]:]  # replace with spaces
+        pred_all.append({
+            'category_type': 'circuit_diagram',
+            'position': position,
+            'content': spice_content,
+        })
     
     # extract latex table 
     latex_table_array, table_positions = extract_tex_table(content)

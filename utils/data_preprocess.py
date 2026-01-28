@@ -443,6 +443,48 @@ def inline_filter(text):
 
     return text, inline_array
 
+# SPICE netlist preprocessing for circuit diagrams
+def clean_spice(spice_content):
+    """
+    Normalize SPICE netlist content for comparison.
+    - Remove comments (lines starting with * or ;)
+    - Normalize whitespace
+    - Convert to lowercase for component names
+    - Remove extra spaces
+    """
+    if not spice_content:
+        return ''
+    
+    lines = []
+    for line in spice_content.split('\n'):
+        line = line.strip()
+        # Skip empty lines and comment lines
+        if not line or line.startswith('*') or line.startswith(';'):
+            continue
+        # Normalize whitespace
+        line = ' '.join(line.split())
+        lines.append(line)
+    
+    # Join and normalize
+    result = ' '.join(lines)
+    # Remove special characters but keep component identifiers
+    result = re.sub(r'[^\w\s.\-_()]', '', result)
+    # Normalize multiple spaces
+    result = re.sub(r'\s+', ' ', result)
+    return result.strip()
+
+def normalize_spice(spice_content):
+    """
+    Similar to clean_spice but more aggressive for matching.
+    Keeps only alphanumeric characters for comparison.
+    """
+    cleaned = clean_spice(spice_content)
+    # Remove all non-alphanumeric except spaces
+    normalized = re.sub(r'[^\w\s]', '', cleaned)
+    # Remove all spaces
+    normalized = re.sub(r'\s+', '', normalized)
+    return normalized.lower()
+
 # Text OCR quality check processing:
 def clean_string(input_string):
     # Use regex to keep Chinese characters, English letters and numbers

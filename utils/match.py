@@ -4,7 +4,7 @@ import numpy as np
 import re
 import sys
 import pdb
-from .data_preprocess import textblock_with_norm_formula, normalized_formula, textblock2unicode, clean_string
+from .data_preprocess import textblock_with_norm_formula, normalized_formula, textblock2unicode, clean_string, normalize_spice
 import re
 from bs4 import BeautifulSoup
 from copy import deepcopy
@@ -46,6 +46,9 @@ def get_gt_pred_lines(gt_mix,pred_dataset_mix,line_type):
                 norm_html_lines.append(str(item['content']))
             elif line_type == 'text':
                 gt_lines.append(str(item['text']))
+            elif line_type == 'circuit_diagram':
+                circuit_content = item.get('spice', '')
+                gt_lines.append(str(circuit_content))
             elif line_type == 'html_table':
                 gt_lines.append(str(item['html']))
             elif line_type == 'formula':
@@ -77,6 +80,10 @@ def get_gt_pred_lines(gt_mix,pred_dataset_mix,line_type):
             elif  item['category_type']=='equation_isolated':
                 pred_lines.append(str(item['content']))
                 norm_pred_lines.append(normalized_formula(str(item['content'])))
+            # circuit_diagram (SPICE netlist)
+            elif item['category_type'] == 'circuit_diagram':
+                pred_lines.append(str(item['content']))
+                norm_pred_lines.append(normalize_spice(str(item['content'])))
             # table
             else:
                 pred_lines.append(str(item['content']))
@@ -111,7 +118,11 @@ def get_gt_pred_lines(gt_mix,pred_dataset_mix,line_type):
                 # Prefer 'text' field if available, otherwise use 'spice' field
                 circuit_content = item.get('text', item.get('spice', ''))
                 gt_lines.append(str(circuit_content))
-                norm_gt_lines.append(clean_string(textblock2unicode(str(circuit_content))))
+                # Use normalize_spice for SPICE content, or textblock2unicode for text content
+                if 'spice' in item and not item.get('text'):
+                    norm_gt_lines.append(normalize_spice(str(circuit_content)))
+                else:
+                    norm_gt_lines.append(clean_string(textblock2unicode(str(circuit_content))))
 
                 if item.get('fine_category_type'):
                     gt_cat_list.append(item['fine_category_type'])
