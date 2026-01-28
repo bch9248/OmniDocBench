@@ -58,7 +58,7 @@ SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images
     - Detect and extract electrical schematics or circuit diagrams.
     - Convert these into a functional, text-based SPICE netlist.
     - Format: Use a standard component-node-value sequence (e.g., R1 1 2 10k).
-    - Container: Wrap the entire netlist strictly with spice and .
+    - Container: Wrap the entire netlist strictly with ```spice and ```.
     - Ground: Always designate the circuit common/ground as node 0.
     
     6. Output Format:

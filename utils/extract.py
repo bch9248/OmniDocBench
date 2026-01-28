@@ -96,7 +96,7 @@ html_table_reg = re.compile(
 
 # SPICE netlist for circuit diagrams
 spice_reg = re.compile(
-    r'<spice>(.*?)</spice>',
+    r'```spice\n(.*?)```',
     re.DOTALL
 )
 
