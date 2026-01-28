@@ -55,9 +55,12 @@ SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images
     - Ignore figures content in the PDF image. Do not attempt to describe or convert images.
 
     5. SPICE Diagrams:
-    - Convert SPICE diagrams to text-based netlist format.
-    - Wrap the entire netlist with <spice> and </spice>
-
+    - Detect and extract electrical schematics or circuit diagrams.
+    - Convert these into a functional, text-based SPICE netlist.
+    - Format: Use a standard component-node-value sequence (e.g., R1 1 2 10k).
+    - Container: Wrap the entire netlist strictly with spice and .
+    - Ground: Always designate the circuit common/ground as node 0.
+    
     6. Output Format:
     - Ensure the output Markdown document has a clear structure with appropriate line breaks between elements.
     - For complex layouts, try to maintain the original document's structure and format as closely as possible.
@@ -76,9 +79,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 
 """
 
@@ -92,9 +95,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 
 """
 
@@ -108,9 +111,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 
 """
 
@@ -130,9 +133,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 
 """
 
@@ -152,9 +155,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 """
 
 def get_sr_prompt(page_id, width, height):
@@ -174,9 +177,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 """
 
 def get_sr_woa_prompt(page_id, width, height):
@@ -192,9 +195,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 """
 
 def get_sr_wos_prompt(page_id, width, height):
@@ -212,9 +215,9 @@ Rules:
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
-- For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
-- No markdown, no explanations
+- For formulas, output the LaTeX code
+- For spice diagrams, output the netlist format, Must enclose in ```spice and ```.
+- No explanations, no comments
 """
 
 def get_golden_prompt(page_id, width, height):
