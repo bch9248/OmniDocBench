@@ -56,6 +56,7 @@ SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images
 
     5. SPICE Diagrams:
     - Convert SPICE diagrams to text-based netlist format.
+    - Wrap the entire netlist with <spice> and </spice>
 
     6. Output Format:
     - Ensure the output Markdown document has a clear structure with appropriate line breaks between elements.
@@ -76,7 +77,23 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
+- No markdown, no explanations
+
+"""
+
+def get_gpt5_prompt(page_id, width, height):
+    return f"""
+Parsing this document follow the rules.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 
 """
@@ -92,7 +109,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 
 """
@@ -114,7 +131,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 
 """
@@ -136,7 +153,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 """
 
@@ -158,7 +175,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 """
 
@@ -176,7 +193,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 """
 
@@ -196,7 +213,7 @@ Rules:
 - Detect layout blocks and their bounding boxes
 - For tables, output the content in valid HTML format
 - For formulas, output the LaTeX code, MUST enclose in $...$
-- For spice diagrams, output the netlist format
+- For spice diagrams, output the netlist format, Must enclose in <spice>...</spice>
 - No markdown, no explanations
 """
 
@@ -301,6 +318,8 @@ PROMPT_MAP = {
     "sr_woa": get_sr_woa_prompt,
     "sr_wos": get_sr_wos_prompt,
     # "golden": get_golden_prompt,
+    # "gpt5": get_gpt5_prompt,
+
 }
 
 
