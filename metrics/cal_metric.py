@@ -162,6 +162,9 @@ class call_Edit_dist():
             saved_samples = samples.samples
         
         if not saved_samples:
+            # Create empty per_page_edit file even when there are no samples
+            with open(f'./result/{save_name}_per_page_edit.json', 'w', encoding='utf-8') as f:
+                json.dump({}, f, indent=4, ensure_ascii=False)
             return samples, {'Edit_dist': {'ALL_page_avg': 'NaN'}}
 
         df = pd.DataFrame(saved_samples)

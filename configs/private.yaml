@@ -22,7 +22,7 @@ end2end_eval:
   dataset:
     dataset_name: end2end_dataset
     ground_truth:
-      data_path: ./OmniDocBench/gemini.json
+      data_path: ./OmniDocBench/golden.json
     prediction:
       data_path: ./private_output/sr
     match_method: quick_match

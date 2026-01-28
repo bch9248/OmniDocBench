@@ -272,6 +272,7 @@ class End2EndDataset():
         for category in pred_dataset:
             if category not in ['html_table','latex_table','md2html_table']:
                 pred_dataset_mix.extend(pred_dataset[category])
+        # circuit_diagram should be included in pred_dataset_mix for matching
         # for category in gt_page_elements:
         #     if category not in ['table']:
         #         gt_mix.extend(gt_page_elements[category])
