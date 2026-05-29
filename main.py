@@ -92,7 +92,7 @@ def infer_page(image_path: Path, mode: str) -> str:
                 ]
             }
         ],
-        temperature=1.0,
+        
     )
 
     elapsed = time.time() - start_time

@@ -6,7 +6,7 @@
 # )
 
 # System Prompt
-# GOLDEN_SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images to JSON format. Please follow these instructions for the conversion:
+# SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images to JSON format. Please follow these instructions for the conversion:
 
 #     1. Text Processing:
 #     - Accurately recognize all text content in the PDF image without guessing or inferring.
@@ -26,10 +26,14 @@
 #     - Ignore figures content in the PDF image. Do not attempt to describe or convert images.
 
 #     5. SPICE Diagrams:
-#     - Convert SPICE diagrams to text-based netlist format.
+#     - Detect and extract electrical schematics or circuit diagrams.
+#     - Convert these into a functional, text-based SPICE netlist.
+#     - Format: Use a standard component-node-value sequence (e.g., R1 1 2 10k).
+#     - Container: Wrap the entire netlist strictly with ```spice and ```.
+#     - Ground: Always designate the circuit common/ground as node 0.
 
 #     6. Output Format:
-#     - Ensure the output JSON document has a clear structure in appropriate schema.
+#     - Ensure the output JSON document has a clear structure in appropriate schema, following the natural reading order of the document.
 #     - For complex layouts, try to maintain the original document's structure and format as closely as possible.
 
 #     Please strictly follow these guidelines to ensure accuracy and consistency in the conversion. Your task is to accurately convert the content of the PDF image into JSON format without adding any extra explanations or comments.
@@ -57,7 +61,10 @@ SYSTEM_PROMPT = """ You are an AI assistant specialized in converting PDF images
     5. SPICE Diagrams:
     - Detect and extract electrical schematics or circuit diagrams.
     - Convert these into a functional, text-based SPICE netlist.
-    - Format: Use a standard component-node-value sequence (e.g., R1 1 2 10k).
+    - Format: Use a standard component-node-value sequence (e.g., R1 P3V3DS 1 10k).
+    - The Net name is in black font, the Component name is in blue or green font.
+    - Write the node in identical black font Net names as in the diagram if provided, otherwise use 1 ,2, 3, etc.
+    - Make sure to include all components and net names exactly as shown in the diagram.
     - Container: Wrap the entire netlist strictly with ```spice and ```.
     - Ground: Always designate the circuit common/ground as node 0.
     
@@ -160,19 +167,27 @@ Rules:
 - No explanations, no comments
 """
 
-def get_sr_prompt(page_id, width, height):
-    return f"""
-Parsing this document following these steps and rules.
+def get_sr_prompt(page_id, width, height, queries=None):
+    query_section = ""
+    if queries:
+        query_section = "Below are the circuit diagram queries that expect to be answered on this page:\n## Circuit Connection Queries\n\n"
+        for i, query in enumerate(queries, 1):
+            query_section += f"{i}. **Query**: {query.get('query', '')}\n"
+            query_section += f"   **Connection Script**: {query.get('script', '')}\n"
+            query_section += "\n"
+        query_section += "\n"
+    
+    return f"""{query_section}Parsing this document following these steps and rules.
 
 Steps:
-1. Retrieve all text content from the page first.
+1. Base on those queries, imagine what formulation of circuit diagrams you expect to see on the page. How are they related to the queries?
 2. Analyze the page and identify each layout block.
 3. For each block, determine its type, text content, and bounding box.
-4. Integrate all text content to the information from each layout block properly.
-5. From the integration, construct the final output following the rules.
+4. Make a cross-verification between imagination and the information from each layout block properly.
+5. Construct the final output following the rules.
 
 Rules:
-- Output ONLY the element in the document in md format 
+- Output ONLY the element in the document in md format , do not output the queries or your imagination
 - Treat this as a single independent page
 - Follow the reading order of the document
 - Detect layout blocks and their bounding boxes
@@ -220,20 +235,36 @@ Rules:
 - No explanations, no comments
 """
 
-def get_golden_prompt(page_id, width, height):
-    return """
+def get_golden_prompt(page_id, width, height, sr_hint=None):
+    hint_section = ""
+    if sr_hint:
+        hint_section = f"""
+IMPORTANT: Reading Order Reference
+Below is a markdown representation of this page that shows the correct reading order.
+Use this as a HINT to determine the proper sequence of layout blocks:
+
+--- START READING ORDER HINT ---
+{sr_hint}
+--- END READING ORDER HINT ---
+
+"""
+    
+    prompt = f"""
 Parsing this document following these steps and rules.
 
 Steps:
 1. Analyze the page and identify each layout block.
 2. For each block, determine its type, text content, and bounding box.
-3. Integrate all text content to the information from each layout block properly.
-. From the integration, construct the final output following the rules.
+3. Detect if the text in each block is rotated or not. There are only two possible angles, 0 and 270 degrees. Identify the angle for each block.
+4. If the text is rotated (270 degrees), identify the real text content accordingly to reflect the rotation.
+5. Integrate all text content to the information from each layout block properly.
+6. Use the reading order hint provided to properly order the blocks.
+7. From the integration, construct the final output following the rules.
 
-Rules:
+{hint_section}Rules:
 - Output ONLY the element in the document in json schema format 
 - Treat this as a single independent page
-- Follow the reading order of the document
+- Follow the reading order of the document (use the hint above to determine correct order)
 - Detect layout blocks and their bounding boxes
 - Category type is <one of: title | text_block | figure | figure_caption | figure_footnote | table | table_caption | table_footnote | equation_isolated | equation_caption | header | footer | page_number | page_footnote | abandon | code_txt | code_txt_caption | reference | text_span | equation_ignore | equation_inline | circuit_diagram | circuit_footnote | circuit_caption | footnote_mark>
 - For tables, output the content in valid HTML format
@@ -243,43 +274,46 @@ Rules:
 
 
 json schema example:
-{
-  "page_info": { "page_attribute": {"xxx": "xxx"}, "page_no": 1, "height": 1684, "width": 1200, "image_path": "page_1.png" },
+"""
+    
+    json_example = f"""{{
+  "page_info": {{ "page_attribute": {{"xxx": "xxx"}}, "page_no": {page_id}, "height": {height}, "width": {width}, "image_path": "page_{page_id}.png" }},
   "layout_dets": [
-      {
+      {{
           "category_type": "text_block",
           "poly": [100.0, 100.0, 1100.0, 100.0, 1100.0, 300.0, 100.0, 300.0],
           "ignore": false, "order": 0, "anno_id": 0,
           "text": "THIS DRAWING AND SPECIFICATIONS, HEREIN, ARE THE PROPERTY OF INVENTEC CORPORATION..."
-      },
-      {
+      }},
+      {{
           "category_type": "title",
           "poly": [300.0, 500.0, 900.0, 500.0, 900.0, 650.0, 300.0, 650.0],
           "ignore": false, "order": 1, "anno_id": 1,
           "text": "MACHU1416 TLD"
-      },
-      {
-          "category_type": "text_block",
+      }},
+      {{
+          "category_type": "circuit_diagram",
           "poly": [500.0, 700.0, 700.0, 700.0, 700.0, 750.0, 500.0, 750.0],
           "ignore": false, "order": 2, "anno_id": 2,
-          "text": "2024.12.17"
-      },
-      {
-          "category_type": "circuit_diagram",
+          "spice": "```spice\\nR8905 301k_1%_2 PV_SYS PV_SYS_RC 0.5M\\nR8906 49.9k_1%_2 PV_SYS_RC OUT 0.5M\\nC8907 100pF_50V_2 PV_SYS 0\\nC8908 49.9k_1%_2 OUT 0.5M\\nC8909 0.22uF_6.3V_2 OUT 0\\nRB855 75_5%_2 CPU_PROC_HOST IN 0.5M\\nRB854 75_5%_4 2 3\\nQ68054 1.2MHZ 3 0 G Q68054_D PANJIT_2N7002KW_3P OFF Vgs=-4.5V 6015B0167001_003\\n```"
+      }},
+      {{
+          "category_type": "equation_isolated",
           "poly": [50.0, 50.0, 1150.0, 50.0, 1150.0, 1400.0, 50.0, 1400.0],
           "ignore": false, "order": 3, "anno_id": 3,
-          "spice": "* Charger Circuit\nU60000 RAA489110AS07GNPHAO\nL00000 0.47uH\nQ60012 AONR32314\nR60001 0.005_1%\nC60011 10uF_25V"
-      },
-      {
-          "category_type": "footer",
+          "latex": "$RSET\\\\ (K\\\\ \\\\mathrm{{OHM}}) = 0.0012T^{{2}} - 0.9308T + 96.147$"
+      }},
+      {{
+          "category_type": "table",
           "poly": [500.0, 1500.0, 700.0, 1500.0, 700.0, 1550.0, 500.0, 1550.0],
           "ignore": false, "order": 4, "anno_id": 4,
-          "text": "INVENTEC"
-      }
+          "html": "<table><thead><tr><th>MARKING</th><th>DESCRIPTION</th></tr></thead><tbody><tr><td>M</td><td>MOTHER BOARD</td></tr><tr><td>U</td><td>DAUGHTER BOARD</td></tr><tr><td>F</td><td>14 INCH MOTHER BOARD</td></tr><tr><td>S</td><td>16 INCH MOTHER BOARD</td></tr></tbody></table>"
+      }}
   ],
-  "extra": { "relation": [] }
-}
-"""
+  "extra": {{ "relation": [] }}
+}}"""
+    
+    return prompt + json_example
 
 coa_prompt = """
 You are a Supervisor managing a Chain-of-Agents (CoA) workflow for debugging Python code. 

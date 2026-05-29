@@ -48,14 +48,14 @@ def compute_overall(metric_json):
         + out["table_Edit_dist"]
         + out["reading_order_Edit_dist"]
         + out["circuit_diagram_Edit_dist"]
-    ) / 4.0
+    ) / 3.0
 
     return out
 
 
 def run(mode: str):
     result_dir = Path("result") / mode
-    output_dir = Path("private_output") / mode # Where all.json lives
+    output_dir = Path("test_output") / mode # Where all.json lives
 
     metric_file = result_dir / f"{mode}_{MATCH_NAME}_metric_result.json"
     text_block_file = result_dir / f"{mode}_{MATCH_NAME}_text_block_result.json"

@@ -20,8 +20,11 @@ from private_prompts import PROMPT_MAP, SYSTEM_PROMPT
 # =============================
 # Configuration
 # =============================
-IMAGE_DIR = Path("OmniDocBench/private_images")
-BASE_OUTPUT_DIR = Path("private_output")
+IMAGE_DIR = Path("OmniDocBench/test_images")
+BASE_OUTPUT_DIR = Path("test_output")
+QUERIES_FILE = Path("generated_queries.json")
+# PAGE_SELECTED = [1, 2, 4, 5, 6, 9, 11, 18, 19, 23, 25, 26, 28, 29, 31, 32, 45, 46, 47, 49, 54, 59, 60, 61, 63, 64, 65, 72, 75, 76, 77, 78, 86, 87, 88, 90, 91, 94, 95, 97, 98]
+PAGE_SELECTED = [2,9,15,20,23,43,47,49,56]
 
 SKIP_EXISTING = True  # Skip inference if .md already exists
 
@@ -41,6 +44,30 @@ def get_image_metadata(image_path: Path):
     with Image.open(image_path) as img:
         width, height = img.size
     return image_path.stem, width, height
+
+
+def load_queries() -> Dict[str, list]:
+    """
+    Load queries from generated_queries.json and organize them by page file.
+    Returns a dict mapping page filenames (e.g., 'page_15.md') to list of query dicts.
+    """
+    if not QUERIES_FILE.exists():
+        print(f"Warning: {QUERIES_FILE} not found. Proceeding without queries.")
+        return {}
+    
+    with open(QUERIES_FILE, 'r', encoding='utf-8') as f:
+        queries = json.load(f)
+    
+    # Group queries by page file
+    queries_by_page = {}
+    for query in queries:
+        page_file = query.get('file')
+        if page_file:
+            if page_file not in queries_by_page:
+                queries_by_page[page_file] = []
+            queries_by_page[page_file].append(query)
+    
+    return queries_by_page
 
 
 # =============================
@@ -68,12 +95,19 @@ BASE_OUTPUT_DIR.mkdir(exist_ok=True)
 # =============================
 # GPT Inference
 # =============================
-def infer_page(image_path: Path, mode: str) -> str:
+def infer_page(image_path: Path, mode: str, sr_hint: str = None, queries: list = None) -> str:
     image_b64 = load_image_base64(image_path)
     page_id, width, height = get_image_metadata(image_path)
 
     prompt_func = PROMPT_MAP.get(mode, PROMPT_MAP["sr"])
-    user_prompt = prompt_func(page_id, width, height)
+    
+    # Pass appropriate parameters based on mode
+    if mode == "golden" and sr_hint:
+        user_prompt = prompt_func(page_id, width, height, sr_hint=sr_hint)
+    elif mode == "sr" and queries:
+        user_prompt = prompt_func(page_id, width, height, queries=queries)
+    else:
+        user_prompt = prompt_func(page_id, width, height)
 
     start_time = time.time()
 
@@ -92,7 +126,7 @@ def infer_page(image_path: Path, mode: str) -> str:
                 ]
             }
         ],
-        temperature=0.0,
+        temperature=1.0,
     )
 
     elapsed = time.time() - start_time
@@ -127,10 +161,29 @@ def run_inference(mode: str, max_pages: int = None):
         total_cost = 0
         count = 0
 
+    # Load queries organized by page
+    queries_by_page = load_queries()
+    if queries_by_page:
+        print(f"Loaded queries for {len(queries_by_page)} pages")
+
     image_files = sorted(
         p for p in IMAGE_DIR.iterdir()
         if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".tiff", ".bmp"}
     )
+
+    # Filter by PAGE_SELECTED
+    filtered_image_files = []
+    for img_path in image_files:
+        # Extract page number from filename (e.g., "page_1.png" -> 1)
+        try:
+            page_num = int(img_path.stem.split('_')[-1])
+            if page_num in PAGE_SELECTED:
+                filtered_image_files.append(img_path)
+        except (ValueError, IndexError):
+            # If we can't parse the page number, skip this file
+            continue
+    
+    image_files = filtered_image_files
 
     if max_pages:
         image_files = image_files[:max_pages]
@@ -143,7 +196,24 @@ def run_inference(mode: str, max_pages: int = None):
         if SKIP_EXISTING and out_path.exists():
             continue
 
-        md_text, elapsed, cost = infer_page(image_path, mode)
+        # Load SR hint for golden mode
+        sr_hint = None
+        if mode == "golden":
+            sr_md_path = BASE_OUTPUT_DIR / "sr" / f"{image_path.stem}.md"
+            if sr_md_path.exists():
+                with open(sr_md_path, "r", encoding="utf-8") as f:
+                    sr_hint = f.read()
+            else:
+                print(f"Warning: SR hint not found for {image_path.stem}, proceeding without hint")
+
+        # Get queries for this page
+        page_file = f"{image_path.stem}.md"
+        page_queries = queries_by_page.get(page_file, [])
+        
+        if page_queries:
+            pbar.set_postfix({"queries": len(page_queries)})
+
+        md_text, elapsed, cost = infer_page(image_path, mode, sr_hint=sr_hint, queries=page_queries)
         
         # Update running totals
         total_time += elapsed
@@ -172,8 +242,8 @@ def run_evaluation(mode: str, base_config: str = "configs/private.yaml"):
         config_data = yaml.safe_load(f)
     
     # 2. Update the prediction path to the specific mode's output
-    # This aligns with the 'private_output/{mode}' directory created in run_inference
-    config_data['end2end_eval']['dataset']['prediction']['data_path'] = f"./private_output/{mode}"
+    # This aligns with the 'test_output/{mode}' directory created in run_inference
+    config_data['end2end_eval']['dataset']['prediction']['data_path'] = f"./test_output/{mode}"
     
     # 3. Save a temporary config for this specific mode
     temp_config_path = f"configs/tmp_eval_{mode}.yaml"

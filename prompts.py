@@ -161,6 +161,22 @@ Rules:
 - No markdown, no explanations
 """
 
+def get_usc_prompt(page_id, width, height):
+    return f"""
+Parsing this document three times into three versions of output first.
+
+Then choose the most consistency response among the three versions as the final output.
+
+Rules:
+- Output ONLY the element in the document in md format 
+- Treat this as a single independent page
+- Follow the reading order of the document
+- Detect layout blocks and their bounding boxes
+- For tables, output the content in valid HTML format
+- For formulas, output the LaTeX code, MUST enclose in $...$
+- No markdown, no explanations
+"""
+
 coa_prompt = """
 You are a Supervisor managing a Chain-of-Agents (CoA) workflow for debugging Python code. 
 This workflow is INTERNAL — only the final Manager Agent’s output is shown to the user.
@@ -200,6 +216,7 @@ PROMPT_MAP = {
     "sr": get_sr_prompt,
     "sr_woa": get_sr_woa_prompt,
     "sr_wos": get_sr_wos_prompt,
+    "usc": get_usc_prompt,
 }
 
 

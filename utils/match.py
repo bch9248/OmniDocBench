@@ -45,17 +45,17 @@ def get_gt_pred_lines(gt_mix,pred_dataset_mix,line_type):
                 gt_lines.append(str(item['content']))
                 norm_html_lines.append(str(item['content']))
             elif line_type == 'text':
-                gt_lines.append(str(item['text']))
+                gt_lines.append(str(item.get('text', '')))
             elif line_type == 'circuit_diagram':
                 circuit_content = item.get('spice', '')
                 gt_lines.append(str(circuit_content))
             elif line_type == 'html_table':
-                gt_lines.append(str(item['html']))
+                gt_lines.append(str(item.get('html', '')))
             elif line_type == 'formula':
-                gt_lines.append(str(item['latex']))
+                gt_lines.append(str(item.get('latex', '')))
             elif line_type == 'latex_table':
-                gt_lines.append(str(item['latex']))
-                norm_html_lines.append(str(item['html']))
+                gt_lines.append(str(item.get('latex', '')))
+                norm_html_lines.append(str(item.get('html', '')))
         
         pred_lines = [str(item['content']) for item in pred_dataset_mix]
         if line_type == 'formula':
@@ -188,21 +188,22 @@ def match_gt2pred_simple(gt_items, pred_items, line_type, img_name):
 
     if not norm_gt_lines: # not matched pred should be concatenate
         pred_idx_list = range(len(norm_pred_lines))
-        match_list.append({
-            'gt_idx': [""],
-            'gt': "",
-            'pred_idx': pred_idx_list,
-            'pred': ''.join(pred_lines[_] for _ in pred_idx_list), 
-            'gt_position': [""],
-            'pred_position': pred_items[pred_idx_list[0]]['position'][0],  # get the first pred's position
-            'norm_gt': "",
-            'norm_pred': ''.join(norm_pred_lines[_] for _ in pred_idx_list),
-            'gt_category_type': "",
-            'pred_category_type': get_pred_category_type(pred_idx_list[0], pred_items), # get the first pred's category
-            'gt_attribute': [{}],
-            'edit': 1,
-            'img_id': img_name
-        })
+        if len(pred_idx_list) > 0:  # Only create match if there are predictions
+            match_list.append({
+                'gt_idx': [""],
+                'gt': "",
+                'pred_idx': pred_idx_list,
+                'pred': ''.join(pred_lines[_] for _ in pred_idx_list), 
+                'gt_position': [""],
+                'pred_position': pred_items[pred_idx_list[0]]['position'][0],  # get the first pred's position
+                'norm_gt': "",
+                'norm_pred': ''.join(norm_pred_lines[_] for _ in pred_idx_list),
+                'gt_category_type': "",
+                'pred_category_type': get_pred_category_type(pred_idx_list[0], pred_items), # get the first pred's category
+                'gt_attribute': [{}],
+                'edit': 1,
+                'img_id': img_name
+            })
         return match_list,None
     elif not norm_pred_lines: # not matched gt should be separated
         for gt_idx in range(len(norm_gt_lines)):

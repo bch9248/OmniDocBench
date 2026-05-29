@@ -22,9 +22,9 @@ end2end_eval:
   dataset:
     dataset_name: end2end_dataset
     ground_truth:
-      data_path: ./OmniDocBench/golden.json
+      data_path: ./OmniDocBench/test_golden.json
     prediction:
-      data_path: ./private_output/sr
+      data_path: ./test_output/sr
     match_method: quick_match
     # filter: 
     #   language: english

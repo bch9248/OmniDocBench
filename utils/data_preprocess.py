@@ -471,7 +471,8 @@ def clean_spice(spice_content):
     result = re.sub(r'[^\w\s.\-_()]', '', result)
     # Normalize multiple spaces
     result = re.sub(r'\s+', ' ', result)
-    return result.strip()
+    # Convert to lowercase
+    return result.strip().lower()
 
 def normalize_spice(spice_content):
     """
@@ -491,4 +492,4 @@ def clean_string(input_string):
     # input_string = input_string.replace('\\t', '').replace('\\n', '').replace('\t', '').replace('\n', '').replace('/t', '').replace('/n', '')
     input_string = input_string.replace('\\t', '').replace('\\n', '').replace('\t', '').replace('\n', '').replace('/t', '').replace('/n', '')
     cleaned_string = re.sub(r'[^\w\u4e00-\u9fff]', '', input_string)   # 只保留中英文和数字
-    return cleaned_string
+    return cleaned_string.lower()

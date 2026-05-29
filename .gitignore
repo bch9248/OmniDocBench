@@ -18,6 +18,17 @@ old_test.py
 old_tools
 old_trace
 result/
+all_output/
+all_result/
+final_result/
+gpt5_result/
+old_output/
+old_result/
+private_output/
+private_result/
+sub_output/
+sub_result/
+test_output/
 
 
 # Environments
@@ -31,3 +42,27 @@ venv.bak/
 
 # Data files
 OmniDocBench/
+
+# Unnecessary files (not required to run main.py or private_main.py)
+analyze_circuit.py
+combine_pages_to_golden.py
+compare_edit_distances.py
+download_better_images.py
+generate_queries.py
+generated_queries_unknown_page.json
+pdf_page_to_png.py
+private_main_unknown_page.py
+query_example.json
+remove_empty_circuit_diagrams.py
+retrieval.py
+test_retrieval.py
+retrieval_results.json
+retrieval_results_all_modes.json
+sr_better_images_list.txt
+sr_better_than_react.json
+MULTI_FILE_RETRIEVAL.md
+OmniDocBench_CLA.md
+QUICKSTART.md
+README.md
+README_zh-CN.md
+downloaded_sr_better_images/

@@ -1,0 +1,394 @@
+[
+  {
+    "id": "query_001",
+    "query": "Verify input decoupling: VRP1V2_VIN is connected to GND through an input capacitor",
+    "script": "VRP1V2_VIN-C-GND",
+    "file": "page_15.md",
+    "gt": true
+  },
+  {
+    "id": "query_002",
+    "query": "Check that the switch node connects to the output through the inductor",
+    "script": "VRP1V2_PH-L-VRP1V2",
+    "file": "page_15.md",
+    "gt": true
+  },
+  {
+    "id": "query_003",
+    "query": "Verify the upper feedback resistor from output to feedback node",
+    "script": "VRP1V2-R-VRA1V2_FB",
+    "file": "page_15.md",
+    "gt": true
+  },
+  {
+    "id": "query_004",
+    "query": "Verify the lower feedback resistor from feedback node to ground",
+    "script": "VRA1V2_FB-R-GND",
+    "file": "page_15.md",
+    "gt": true
+  },
+  {
+    "id": "query_005",
+    "query": "Check if the input net is tied to ground through a resistor (should not be present)",
+    "script": "VRP1V2_VIN-R-GND",
+    "file": "page_15.md",
+    "gt": false
+  },
+  {
+    "id": "query_006",
+    "query": "Check if PAD61210 short-circuits P3V3DS to VRP1V2_VIN (it should not)",
+    "script": "P3V3DS-PAD-VRP1V2_VIN",
+    "file": "page_15.md",
+    "gt": false
+  },
+  {
+    "id": "query_007",
+    "query": "Verify the regulator input PVCORE_VIN2 is decoupled to ground by multiple capacitors",
+    "script": "PVCORE_VIN2-C-GND",
+    "file": "page_20.md",
+    "gt": true
+  },
+  {
+    "id": "query_008",
+    "query": "Check that U66030 VIN pins are tied to the PVCORE_VIN2 net",
+    "script": "PVCORE_VIN2-U66030(VIN)",
+    "file": "page_20.md",
+    "gt": true
+  },
+  {
+    "id": "query_009",
+    "query": "Confirm the bootstrap capacitor is between BST and PH (switch) nodes",
+    "script": "VRACPU_BST3-C68035-VRACPU_PH3",
+    "file": "page_20.md",
+    "gt": true
+  },
+  {
+    "id": "query_010",
+    "query": "Verify the inductor connects the phase node to the PVCORE output",
+    "script": "VRACPU_PH3-L66030-PVCORE",
+    "file": "page_20.md",
+    "gt": true
+  },
+  {
+    "id": "query_011",
+    "query": "Check that the VCC/bias net VRB_VDD3 is bypassed to ground",
+    "script": "VRB_VDD3-C68039-GND",
+    "file": "page_20.md",
+    "gt": true
+  },
+  {
+    "id": "query_012",
+    "query": "Ensure PVCORE is NOT directly tied to PVCORE_VIN2 (should be isolated by the regulator stage)",
+    "script": "PVCORE-direct-PVCORE_VIN2",
+    "file": "page_20.md",
+    "gt": false
+  },
+  {
+    "id": "query_013",
+    "query": "Check if U68030 CS pin (VRACPU_CS3) is connected to the PVCORE output (it is not shown connected)",
+    "script": "VRACPU_CS3-U68030-PVCORE",
+    "file": "page_20.md",
+    "gt": false
+  },
+  {
+    "id": "query_014",
+    "query": "Verify PVBAT is connected to PVCCSA_VIN through a resistor",
+    "script": "PVBAT-R-PVCCSA_VIN",
+    "file": "page_23.md",
+    "gt": true
+  },
+  {
+    "id": "query_015",
+    "query": "Check if VRP5VO_2 feeds P5V0A_USB through a resistor",
+    "script": "VRP5VO_2-R-P5V0A_USB",
+    "file": "page_23.md",
+    "gt": true
+  },
+  {
+    "id": "query_016",
+    "query": "Confirm VRP5VO is connected to P5V0DS via a resistor",
+    "script": "VRP5VO-R-P5V0DS",
+    "file": "page_23.md",
+    "gt": true
+  },
+  {
+    "id": "query_017",
+    "query": "Confirm VRP3V3 is connected to P3V3DS via a resistor",
+    "script": "VRP3V3-R-P3V3DS",
+    "file": "page_23.md",
+    "gt": true
+  },
+  {
+    "id": "query_018",
+    "query": "Confirm VRP1V8 is connected to P1V8DS via a resistor",
+    "script": "VRP1V8-R-P1V8DS",
+    "file": "page_23.md",
+    "gt": true
+  },
+  {
+    "id": "query_019",
+    "query": "Check if PVCORE_VIN1 is connected to P5V0A_USB through any resistor (should not exist)",
+    "script": "PVCORE_VIN1-R-P5V0A_USB",
+    "file": "page_23.md",
+    "gt": false
+  },
+  {
+    "id": "query_020",
+    "query": "Verify that VRPVCCIO_VIN is connected to P3V3DS through a resistor (should not exist)",
+    "script": "VRPVCCIO_VIN-R-P3V3DS",
+    "file": "page_23.md",
+    "gt": false
+  },
+  {
+    "id": "query_021",
+    "query": "Check if PVBAT connects to P3V3DS through a PAD component (this doesn't exist here)",
+    "script": "PVBAT-PAD-P3V3DS",
+    "file": "page_23.md",
+    "gt": false
+  },
+  {
+    "id": "query_022",
+    "query": "Check if DRAMRST# is connected to GND through a resistor",
+    "script": "DRAMRST#-R-GND",
+    "file": "page_43.md",
+    "gt": true
+  },
+  {
+    "id": "query_023",
+    "query": "Check if DRAMRST# is connected to GND through a capacitor",
+    "script": "DRAMRST#-C-GND",
+    "file": "page_43.md",
+    "gt": true
+  },
+  {
+    "id": "query_024",
+    "query": "Verify DRAMRST# has both a resistor and a capacitor to GND (parallel RC to ground)",
+    "script": "DRAMRST#-R-C-GND",
+    "file": "page_43.md",
+    "gt": true
+  },
+  {
+    "id": "query_025",
+    "query": "Check if P5V0_DDR5 is decoupled to GND through a capacitor",
+    "script": "P5V0_DDR5-C-GND",
+    "file": "page_43.md",
+    "gt": true
+  },
+  {
+    "id": "query_026",
+    "query": "Verify there is no resistor connecting DRAMRST# to P5V0_DDR5 (should be isolated)",
+    "script": "DRAMRST#-R-P5V0_DDR5",
+    "file": "page_43.md",
+    "gt": false
+  },
+  {
+    "id": "query_027",
+    "query": "Check if there is a PAD connecting DRAMRST# to GND (not present)",
+    "script": "DRAMRST#-PAD-GND",
+    "file": "page_43.md",
+    "gt": false
+  },
+  {
+    "id": "query_028",
+    "query": "Ensure P5V0_DDR5 is not connected to DRAMRST# through a capacitor",
+    "script": "P5V0_DDR5-C-DRAMRST#",
+    "file": "page_43.md",
+    "gt": false
+  },
+  {
+    "id": "query_029",
+    "query": "Verify PV_VBUS_CNTR_1 is decoupled to GND by C2618",
+    "script": "PV_VBUS_CNTR_1-C-GND",
+    "file": "page_47.md",
+    "gt": true
+  },
+  {
+    "id": "query_030",
+    "query": "Check that PV_VBUS_CNTR_1 is tied to GND through multiple parallel capacitors",
+    "script": "PV_VBUS_CNTR_1-Cx6-GND",
+    "file": "page_47.md",
+    "gt": true
+  },
+  {
+    "id": "query_031",
+    "query": "Confirm SBU1_P0_A is clamped to GND via ESD diode",
+    "script": "SBU1_P0_A-D-GND",
+    "file": "page_47.md",
+    "gt": true
+  },
+  {
+    "id": "query_032",
+    "query": "Confirm USB_P1_DN is protected to GND by the 3\u2011pin ESD array",
+    "script": "USB_P1_DN-D-GND",
+    "file": "page_47.md",
+    "gt": true
+  },
+  {
+    "id": "query_033",
+    "query": "Confirm TBTA_TXRX1_C_DN is clamped to GND",
+    "script": "TBTA_TXRX1_C_DN-D-GND",
+    "file": "page_47.md",
+    "gt": true
+  },
+  {
+    "id": "query_034",
+    "query": "Verify that USB_P1_DP connects to PV_VBUS_CNTR_1 through any component (should not exist)",
+    "script": "USB_P1_DP-*-PV_VBUS_CNTR_1",
+    "file": "page_47.md",
+    "gt": false
+  },
+  {
+    "id": "query_035",
+    "query": "Check if SBU2_P0_A is connected to SBU1_P0_A through a diode (should not exist)",
+    "script": "SBU2_P0_A-D-SBU1_P0_A",
+    "file": "page_47.md",
+    "gt": false
+  },
+  {
+    "id": "query_036",
+    "query": "Verify BB_TCP2_FLASH_DO is pulled up to P1V8DS_FLASH_D_A through a resistor",
+    "script": "P1V8DS_FLASH_D_A-R-BB_TCP2_FLASH_DO",
+    "file": "page_49.md",
+    "gt": true
+  },
+  {
+    "id": "query_037",
+    "query": "Check BB_TCP2_FLASH_CS_N has a pull-up to P1V8DS_FLASH_D_A via a resistor",
+    "script": "P1V8DS_FLASH_D_A-R-BB_TCP2_FLASH_CS_N",
+    "file": "page_49.md",
+    "gt": true
+  },
+  {
+    "id": "query_038",
+    "query": "Confirm BB_TCP2_TMS is connected to P1V8DS_HBR through a resistor",
+    "script": "P1V8DS_HBR-R-BB_TCP2_TMS",
+    "file": "page_49.md",
+    "gt": true
+  },
+  {
+    "id": "query_039",
+    "query": "Confirm BRT_FORCE_PWR is tied to P1V8DS_HBR via resistors",
+    "script": "P1V8DS_HBR-R-BRT_FORCE_PWR",
+    "file": "page_49.md",
+    "gt": true
+  },
+  {
+    "id": "query_040",
+    "query": "Check TCP2_AUX_R_DN has capacitors to ground (shunt/AC path to GND)",
+    "script": "TCP2_AUX_R_DN-C-GND",
+    "file": "page_49.md",
+    "gt": true
+  },
+  {
+    "id": "query_041",
+    "query": "Test whether P3V3DS is directly connected to ground through a resistor (should NOT be)",
+    "script": "P3V3DS-R-GND",
+    "file": "page_49.md",
+    "gt": false
+  },
+  {
+    "id": "query_042",
+    "query": "Check if BB_TCP2_FLASH_CS_N is capacitor-coupled to ground (should NOT be)",
+    "script": "BB_TCP2_FLASH_CS_N-C-GND",
+    "file": "page_49.md",
+    "gt": false
+  },
+  {
+    "id": "query_043",
+    "query": "Verify TBT_LSX2_RXD has a capacitor to ground (should NOT be)",
+    "script": "TBT_LSX2_RXD-C-GND",
+    "file": "page_49.md",
+    "gt": false
+  },
+  {
+    "id": "query_044",
+    "query": "Check if CCG6_VBUS_C_CTRL_P1 is connected to PD_ADP_DIS1 through a resistor",
+    "script": "CCG6_VBUS_C_CTRL_P1-R-PD_ADP_DIS1",
+    "file": "page_56.md",
+    "gt": false
+  },
+  {
+    "id": "query_045",
+    "query": "Verify if CCG6_VBUS_C_CTRL_P1 is tied to ground via a capacitor",
+    "script": "CCG6_VBUS_C_CTRL_P1-C-GND",
+    "file": "page_56.md",
+    "gt": false
+  },
+  {
+    "id": "query_046",
+    "query": "Check if PD_ADP_DIS1 connects to a PAD/connector",
+    "script": "PD_ADP_DIS1-PAD",
+    "file": "page_56.md",
+    "gt": false
+  },
+  {
+    "id": "query_047",
+    "query": "Verify a diode path between CCG6_VBUS_C_CTRL_P1 and PD_ADP_DIS1",
+    "script": "CCG6_VBUS_C_CTRL_P1-D-PD_ADP_DIS1",
+    "file": "page_56.md",
+    "gt": false
+  },
+  {
+    "id": "query_048",
+    "query": "Check if a named IC (Uxxxx) implements the 'High-side path switch' and is driven by these nets",
+    "script": "CCG6_VBUS_C_CTRL_P1-U-HighSidePathSwitch;PD_ADP_DIS1-U-HighSidePathSwitch",
+    "file": "page_56.md",
+    "gt": false
+  },
+  {
+    "id": "query_049",
+    "query": "Verify PVSYS is connected to PVSYS_RC through a resistor",
+    "script": "PVSYS-R-PVSYS_RC",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_050",
+    "query": "Check that PVSYS_RC is decoupled to ground via a capacitor",
+    "script": "PVSYS_RC-C-GND",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_051",
+    "query": "Confirm V_ADP_ADC4 has both resistive and capacitive paths to ground",
+    "script": "V_ADP_ADC4-R-C-GND",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_052",
+    "query": "Verify OCP_CHG# connects to CPU_PROCHOT# through a series resistor",
+    "script": "OCP_CHG#-R-CPU_PROCHOT#",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_053",
+    "query": "Check the MOSFET gate is driven by OCP_PWM_OUT and its source is grounded",
+    "script": "OCP_PWM_OUT-Q-GND",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_054",
+    "query": "Verify CPU_PROCHOT# reaches the MOSFET drain through a series resistor",
+    "script": "CPU_PROCHOT#-R-Q68054(D)",
+    "file": "page_9.md",
+    "gt": true
+  },
+  {
+    "id": "query_055",
+    "query": "Check if V_ADP_ADC4 is connected to PVSYS_RC through R68095 (should be open due to NI)",
+    "script": "PVSYS_RC-R-V_ADP_ADC4",
+    "file": "page_9.md",
+    "gt": false
+  },
+  {
+    "id": "query_056",
+    "query": "Verify a PAD component connects OCP_CHG# to CPU_PROCHOT# (no PAD present)",
+    "script": "OCP_CHG#-PAD-CPU_PROCHOT#",
+    "file": "page_9.md",
+    "gt": false
+  }
+]

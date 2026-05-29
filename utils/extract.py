@@ -96,7 +96,7 @@ html_table_reg = re.compile(
 
 # SPICE netlist for circuit diagrams
 spice_reg = re.compile(
-    r'```spice\n(.*?)```',
+    r'````spice\n(.*?)````',
     re.DOTALL
 )
 
@@ -163,6 +163,7 @@ def md_tex_filter(content):
             'position': position,
             'content': spice_content,
         })
+        content = content[:position[0]] + ' '*(position[1]-position[0]) + content[position[1]:]
     
     # extract latex table 
     latex_table_array, table_positions = extract_tex_table(content)
